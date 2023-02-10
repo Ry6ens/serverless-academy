@@ -1,73 +1,13 @@
 const TelegramBot = require('node-telegram-bot-api');
-const axios = require('axios');
-const dotenv = require('dotenv');
 
-dotenv.config();
+process.env.TELEGRAM_TOKEN = '6014358760:AAHMtB-lQ1ZNmqpt8_b8RYr5zBlHpxnE4V8';
+process.env.OPEN_WEATHER = '801fbe5ddd768aadd0ca100e8701df2f';
 
-const { OPEN_WEATHER, TELEGRAM_TOKEN } = process.env;
+const { TELEGRAM_TOKEN } = process.env;
 
-// OpenWeatherMap endpoint for getting weather by city name
-const weatherEndpoint = city =>
-  `http://api.openweathermap.org/data/2.5/weather?q=${city}&units=metric&&appid=${OPEN_WEATHER}`;
+const { getWeather } = require('./api');
 
-// URL that provides icon according to the weather
-const weatherIcon = icon => `http://openweathermap.org/img/w/${icon}.png`;
-
-// Template for weather response
-const weatherHtmlTemplate = (name, main, weather, wind, clouds, sys) => {
-  const getLocalTime = timestamp => {
-    const getDate = new Date(timestamp * 1000);
-    return getDate.toLocaleTimeString(sys.country);
-  };
-
-  return `The weather in <b>${name}</b>:
-🪧 <b>${weather.description}</b>
-🌡 Temperature: <b>${main.temp} °C</b>
-⏳ Pressure: <b>${main.pressure} hPa</b>
-💧 Humidity: <b>${main.humidity} %</b>
-💨 Wind: <b>${wind.speed} meter/sec</b>
-☁️ Clouds: <b>${clouds.all} %</b>
-🌅 Sunrise: <b>${getLocalTime(sys.sunrise)}</b>
-🌇 Sunset: <b>${getLocalTime(sys.sunset)}</b>
-`;
-};
-
-// Function that gets the weather by the city name
-const getWeatherByCity = async (chatId, city) => {
-  const endpoint = weatherEndpoint(city);
-
-  try {
-    const { data } = await axios.get(endpoint);
-
-    const { name, main, weather, wind, clouds, sys } = data;
-
-    await bot.sendPhoto(chatId, weatherIcon(weather[0].icon));
-    await bot.sendMessage(
-      chatId,
-      weatherHtmlTemplate(name, main, weather[0], wind, clouds, sys),
-      {
-        parse_mode: 'HTML',
-      }
-    );
-    await bot.sendMessage(chatId, 'Subscribe forecast', {
-      reply_markup: JSON.stringify({
-        inline_keyboard: [
-          [
-            {
-              text: `Subscribe`,
-              callback_data: 'sub',
-            },
-          ],
-        ],
-      }),
-    });
-  } catch (error) {
-    console.log(error);
-    bot.sendMessage(chatId, `${error.response.data.message}`, {
-      parse_mode: 'HTML',
-    });
-  }
-};
+const { weatherHtmlTemplate } = require('./templates');
 
 // Create a bot
 const bot = new TelegramBot(TELEGRAM_TOKEN, { polling: true });
@@ -77,6 +17,37 @@ bot.setMyCommands([
   { command: 'start', description: 'show menu' },
   { command: 'city', description: 'get the weather at selected city' },
 ]);
+
+// Function that gets the weather by the city name
+const getWeatherByCity = async (chatId, city) => {
+  const data = await getWeather(city);
+
+  const { name, main, weather, wind, clouds, sys } = data;
+
+  // Weather icon
+  const weatherIcon = `http://openweathermap.org/img/w/${weather[0].icon}.png`;
+
+  await bot.sendPhoto(chatId, weatherIcon);
+  await bot.sendMessage(
+    chatId,
+    weatherHtmlTemplate(name, main, weather[0], wind, clouds, sys),
+    {
+      parse_mode: 'HTML',
+    }
+  );
+  await bot.sendMessage(chatId, 'Subscribe forecast', {
+    reply_markup: JSON.stringify({
+      inline_keyboard: [
+        [
+          {
+            text: `Subscribe`,
+            callback_data: 'sub',
+          },
+        ],
+      ],
+    }),
+  });
+};
 
 // Listener (handler) for telegram's /start event
 bot.onText(/\/start/, msg => {
@@ -113,7 +84,6 @@ bot.onText(/\/city/, (msg, match) => {
     bot.sendMessage(chatId, `Please provide city name next format: \n/city city_name`);
     return;
   }
-
   getWeatherByCity(chatId, city);
 });
 
@@ -156,7 +126,6 @@ bot.on('callback_query', query => {
   }
 
   if (query.data === '3') {
-    console.log(city);
     bot.sendMessage(chatId, `You subscribed weather forecast at intervals of 3 hours`);
 
     // send weather every 3 hours

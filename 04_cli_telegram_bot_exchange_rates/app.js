@@ -1,8 +1,6 @@
 const TelegramBot = require('node-telegram-bot-api');
-const dotenv = require('dotenv');
 
-dotenv.config();
-
+process.env.TELEGRAM_TOKEN = '6264144451:AAFoVjLhiyTXWMKyVX8mHq_ndpRoZeyCDSE';
 const { TELEGRAM_TOKEN } = process.env;
 
 const { getCurrencyPrivatbank, getCurrencyMonobank } = require('./api');
