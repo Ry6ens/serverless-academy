@@ -22,31 +22,34 @@ bot.setMyCommands([
 const getWeatherByCity = async (chatId, city) => {
   const data = await getWeather(city);
 
-  const { name, main, weather, wind, clouds, sys } = data;
+  // const { name, main, weather, wind, clouds, sys } = data;
+  const { list } = data;
+
+  list.map(el => console.log(el.dt_txt));
 
   // Weather icon
-  const weatherIcon = `http://openweathermap.org/img/w/${weather[0].icon}.png`;
+  // const weatherIcon = `http://openweathermap.org/img/w/${weather[0].icon}.png`;
 
-  await bot.sendPhoto(chatId, weatherIcon);
-  await bot.sendMessage(
-    chatId,
-    weatherHtmlTemplate(name, main, weather[0], wind, clouds, sys),
-    {
-      parse_mode: 'HTML',
-    }
-  );
-  await bot.sendMessage(chatId, 'Subscribe forecast', {
-    reply_markup: JSON.stringify({
-      inline_keyboard: [
-        [
-          {
-            text: `Subscribe`,
-            callback_data: 'sub',
-          },
-        ],
-      ],
-    }),
-  });
+  // await bot.sendPhoto(chatId, weatherIcon);
+  // await bot.sendMessage(
+  //   chatId,
+  //   weatherHtmlTemplate(name, main, weather[0], wind, clouds, sys),
+  //   {
+  //     parse_mode: 'HTML',
+  //   }
+  // );
+  // await bot.sendMessage(chatId, 'Subscribe forecast', {
+  //   reply_markup: JSON.stringify({
+  //     inline_keyboard: [
+  //       [
+  //         {
+  //           text: `Subscribe`,
+  //           callback_data: 'sub',
+  //         },
+  //       ],
+  //     ],
+  //   }),
+  // });
 };
 
 // Listener (handler) for telegram's /start event
