@@ -7,7 +7,7 @@ const { TELEGRAM_TOKEN } = process.env;
 
 const { getWeather } = require('./api');
 
-const { weatherHtmlTemplate } = require('./templates');
+const { weather00HtmlTemplate, weatherTitleHTMLTemplate } = require('./templates');
 
 // Create a bot
 const bot = new TelegramBot(TELEGRAM_TOKEN, { polling: true });
@@ -80,7 +80,8 @@ bot.onText(/at intervals of 3 hours/, msg => {
   const chatId = msg.chat.id;
   console.log('3 hours');
 
-  const array = cityData.list.map(el => weatherHtmlTemplate(el));
+  const array = cityData.list.map(el => weather00HtmlTemplate(el));
+
   const text = array.join('\n');
 
   bot.sendMessage(chatId, `<b>The weather in ${cityData.city.name}:</b> \n \n` + text, {
@@ -94,11 +95,27 @@ bot.onText(/at intervals of 6 hours/, msg => {
 
   const filterData = cityData.list.filter((el, index) => index % 2 === 0);
 
-  const array = filterData.map(el => weatherHtmlTemplate(el));
-  console.log(array);
-  const text = array.join('\n');
+  // const array = filterData.map(el => weather03HtmlTemplate(el));
+  const arrayQWE = [];
+  const array = filterData.reduce((previousValue, currentValue) => {
+    if (previousValue.slice(0, 10) !== currentValue.dt_txt.slice(0, 10)) {
+      console.log('!==', currentValue.dt_txt);
+      arrayQWE.push(weatherTitleHTMLTemplate(currentValue));
+    }
 
-  bot.sendMessage(chatId, `<b>The weather in ${cityData.city.name}:</b> \n \n` + text, {
-    parse_mode: 'HTML',
-  });
+    previousValue = currentValue.dt_txt;
+
+    arrayQWE.push(`"current", ${currentValue.dt_txt}`);
+    console.log('previousValue:::', previousValue, currentValue.dt_txt);
+
+    return (previousValue = currentValue.dt_txt);
+  }, filterData[0].dt_txt);
+
+  console.log('arrayQWE:::', arrayQWE);
+
+  // const text = array.join('\n');
+
+  // bot.sendMessage(chatId, `<b>The weather in ${cityData.city.name}:</b> \n \n` + text, {
+  //   parse_mode: 'HTML',
+  // });
 });

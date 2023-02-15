@@ -1,4 +1,4 @@
-const weatherHtmlTemplate = ({ dt_txt, main, weather }) => {
+const weather00HtmlTemplate = ({ dt_txt, main, weather }) => {
   const setDate = new Date(dt_txt.slice(0, 10));
   const getDate = setDate.getDate();
   const getMonth = setDate.toLocaleDateString('en-US', { month: 'long' });
@@ -18,7 +18,7 @@ const weatherHtmlTemplate = ({ dt_txt, main, weather }) => {
     return `${tempRound}`;
   };
 
-  if ((dt_txt.slice(11, 16) === '00:00') | (dt_txt.slice(11, 16) === '03:00')) {
+  if (dt_txt.slice(11, 16) === '00:00') {
     return `\n<b>${getDayName}, ${getDate} ${getMonth}</b> \n${dt_txt.slice(
       11,
       16
@@ -49,4 +49,4 @@ const weatherHtmlTemplate = ({ dt_txt, main, weather }) => {
   }
 };
 
-module.exports = weatherHtmlTemplate;
+module.exports = weather00HtmlTemplate;
