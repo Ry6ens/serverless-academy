@@ -13,64 +13,23 @@ const { weatherHtmlTemplate } = require('./templates');
 const bot = new TelegramBot(TELEGRAM_TOKEN, { polling: true });
 
 // Create commands for a bot
-bot.setMyCommands([
-  { command: 'start', description: 'show menu' },
-  { command: 'city', description: 'get the weather at selected city' },
-]);
-
-// Function that gets the weather by the city name
-const getWeatherByCity = async (chatId, city) => {
-  const data = await getWeather(city);
-
-  // const { name, main, weather, wind, clouds, sys } = data;
-  const { list } = data;
-
-  list.map(el => console.log(el.dt_txt));
-
-  // Weather icon
-  // const weatherIcon = `http://openweathermap.org/img/w/${weather[0].icon}.png`;
-
-  // await bot.sendPhoto(chatId, weatherIcon);
-  // await bot.sendMessage(
-  //   chatId,
-  //   weatherHtmlTemplate(name, main, weather[0], wind, clouds, sys),
-  //   {
-  //     parse_mode: 'HTML',
-  //   }
-  // );
-  // await bot.sendMessage(chatId, 'Subscribe forecast', {
-  //   reply_markup: JSON.stringify({
-  //     inline_keyboard: [
-  //       [
-  //         {
-  //           text: `Subscribe`,
-  //           callback_data: 'sub',
-  //         },
-  //       ],
-  //     ],
-  //   }),
-  // });
-};
+bot.setMyCommands([{ command: 'start', description: 'show menu' }]);
 
 // Listener (handler) for telegram's /start event
-bot.onText(/\/start/, msg => {
+bot.onText(/\/start|↩️ Back to Menu/, msg => {
   const chatId = msg.chat.id;
   bot.sendMessage(
     chatId,
-    `Welcome at <b>BotWeatherForecast</b>
-        
-    Available commands:
-    
-    /start - show menu
-    /city <b>city</b> - shows weather for selected <b>city</b>
-      `,
+    `Welcome at <b>BotExchangeRate</b>
+          
+      Available commands:
+      
+      /start - show menu
+        `,
     {
       parse_mode: 'HTML',
       reply_markup: JSON.stringify({
-        keyboard: [
-          [{ text: '🌆 Choose a city' }],
-          [{ text: '📍 Share Location', request_location: true }],
-        ],
+        keyboard: [[{ text: '🌎 City' }]],
         resize_keyboard: true,
         one_time_keyboard: true,
       }),
@@ -78,86 +37,68 @@ bot.onText(/\/start/, msg => {
   );
 });
 
-// Listener (handler) for telegram's /weather event
-bot.onText(/\/city/, (msg, match) => {
+bot.onText(/🌎 City/, msg => {
   const chatId = msg.chat.id;
-  const city = match.input.split(' ')[1];
-
-  if (city === undefined) {
-    bot.sendMessage(chatId, `Please provide city name next format: \n/city city_name`);
-    return;
-  }
-  getWeatherByCity(chatId, city);
+  bot.sendMessage(chatId, 'Write the name of the city that I can show you the weather:', {
+    parse_mode: 'HTML',
+  });
 });
 
-// Listener (handler) for telegram's /weather event
-bot.onText(/\🌆 Choose a city/, msg => {
-  const chatId = msg.chat.id;
-  bot.sendMessage(chatId, `Please provide city name next format: \n/city city_name`);
-});
+let cityData;
 
-// Callback
-bot.on('callback_query', query => {
-  const chatId = query.message.chat.id;
-  const messageId = query.message.message_id;
+bot.onText(
+  /^(?!\/start|🌎 City|↩️ Back to Menu|at intervals of 3 hours|at intervals of 6 hours)/,
+  async msg => {
+    const chatId = msg.chat.id;
 
-  bot.deleteMessage(chatId, messageId);
+    const data = await getWeather(msg.text);
 
-  if (query.data === 'sub') {
-    bot.sendMessage(chatId, 'Choose intervals to return a forecast:', {
+    if (!data.hasOwnProperty('city')) {
+      bot.sendMessage(chatId, data, {
+        parse_mode: 'HTML',
+      });
+      return;
+    }
+
+    cityData = data;
+
+    bot.sendMessage(chatId, 'Choose intervals:', {
+      parse_mode: 'HTML',
       reply_markup: JSON.stringify({
-        inline_keyboard: [
-          [
-            {
-              text: 'at intervals of 3 hours',
-              callback_data: '3',
-            },
-            {
-              text: 'at intervals of 6 hours',
-              callback_data: '6',
-            },
-          ],
-          [
-            {
-              text: 'back',
-              callback_data: 'start',
-            },
-          ],
+        keyboard: [
+          [{ text: 'at intervals of 3 hours' }, { text: 'at intervals of 6 hours' }],
+          [{ text: '↩️ Back to Menu' }],
         ],
+        resize_keyboard: true,
+        one_time_keyboard: true,
       }),
     });
   }
+);
 
-  if (query.data === '3') {
-    bot.sendMessage(chatId, `You subscribed weather forecast at intervals of 3 hours`);
+bot.onText(/at intervals of 3 hours/, msg => {
+  const chatId = msg.chat.id;
+  console.log('3 hours');
 
-    // send weather every 3 hours
-    setInterval(() => {
-      getWeatherByCity(chatId, city);
-    }, 1.08e7);
-  }
+  const array = cityData.list.map(el => weatherHtmlTemplate(el));
+  const text = array.join('\n');
 
-  if (query.data === '6') {
-    bot.sendMessage(chatId, `You subscribed weather forecast at intervals of 6 hours`);
+  bot.sendMessage(chatId, `<b>The weather in ${cityData.city.name}:</b> \n \n` + text, {
+    parse_mode: 'HTML',
+  });
+});
 
-    // send weather every 6 hours
-    setInterval(() => {
-      getWeatherByCity(chatId, city);
-    }, 2.16e7);
-  }
+bot.onText(/at intervals of 6 hours/, msg => {
+  const chatId = msg.chat.id;
+  console.log('6 hours');
 
-  if (query.data === 'start') {
-    bot.sendMessage(chatId, 'Subscribe', {
-      reply_markup: JSON.stringify({
-        inline_keyboard: [
-          [
-            {
-              text: `Subscribe forecast`,
-              callback_data: 'sub',
-            },
-          ],
-        ],
-      }),
-    });
-  }
+  const filterData = cityData.list.filter((el, index) => index % 2 === 0);
+
+  const array = filterData.map(el => weatherHtmlTemplate(el));
+  console.log(array);
+  const text = array.join('\n');
+
+  bot.sendMessage(chatId, `<b>The weather in ${cityData.city.name}:</b> \n \n` + text, {
+    parse_mode: 'HTML',
+  });
 });

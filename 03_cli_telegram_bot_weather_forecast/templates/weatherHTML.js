@@ -1,19 +1,52 @@
-const weatherHtmlTemplate = (name, main, weather, wind, clouds, sys) => {
-  const getLocalTime = timestamp => {
-    const getDate = new Date(timestamp * 1000);
-    return getDate.toLocaleTimeString(sys.country);
+const weatherHtmlTemplate = ({ dt_txt, main, weather }) => {
+  const setDate = new Date(dt_txt.slice(0, 10));
+  const getDate = setDate.getDate();
+  const getMonth = setDate.toLocaleDateString('en-US', { month: 'long' });
+  const getDayName = setDate.toLocaleDateString('en-US', { weekday: 'long' });
+
+  const temparature = temp => {
+    const tempRound = temp.toFixed(0);
+    const charc = tempRound.charAt(0);
+
+    if (tempRound.charAt(1) === '0') {
+      return `${tempRound.replace(charc, ' ')}`;
+    }
+
+    if (tempRound.charAt(0) !== '-') {
+      return `+${tempRound}`;
+    }
+    return `${tempRound}`;
   };
 
-  return `The weather in <b>${name}</b>:
-  🪧 <b>${weather.description}</b>
-  🌡 Temperature: <b>${main.temp} °C</b>
-  ⏳ Pressure: <b>${main.pressure} hPa</b>
-  💧 Humidity: <b>${main.humidity} %</b>
-  💨 Wind: <b>${wind.speed} meter/sec</b>
-  ☁️ Clouds: <b>${clouds.all} %</b>
-  🌅 Sunrise: <b>${getLocalTime(sys.sunrise)}</b>
-  🌇 Sunset: <b>${getLocalTime(sys.sunset)}</b>
-  `;
+  if ((dt_txt.slice(11, 16) === '00:00') | (dt_txt.slice(11, 16) === '03:00')) {
+    return `\n<b>${getDayName}, ${getDate} ${getMonth}</b> \n${dt_txt.slice(
+      11,
+      16
+    )},  🌡 ${temparature(main.temp)} °C,  ${weather[0].description}`;
+  }
+
+  switch (weather[0].main) {
+    case 'Clouds':
+      return `${dt_txt.slice(11, 16)},  🌡 ${temparature(main.temp)} °C, ☁️ ${
+        weather[0].description
+      }`;
+    case 'Rain':
+      return `${dt_txt.slice(11, 16)},  🌡 ${temparature(main.temp)} °C, 🌧 ${
+        weather[0].description
+      }`;
+    case 'Snow':
+      return `${dt_txt.slice(11, 16)},  🌡 ${temparature(main.temp)} °C, ❄️ ${
+        weather[0].description
+      }`;
+    case 'Clear':
+      return `${dt_txt.slice(11, 16)},  🌡 ${temparature(main.temp)} °C, ☀️ ${
+        weather[0].description
+      }`;
+    default:
+      `${dt_txt.slice(11, 16)},  🌡 ${temparature(main.temp)} °C,  ${
+        weather[0].description
+      }`;
+  }
 };
 
 module.exports = weatherHtmlTemplate;
