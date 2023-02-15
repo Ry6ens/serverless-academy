@@ -1,4 +1,4 @@
-const weather00HtmlTemplate = require('./00weatherHTML');
+const weatherHtmlTemplate = require('./weatherHTML');
 const weatherTitleHTMLTemplate = require('./weatherTitleHTML');
 
-module.exports = { weather00HtmlTemplate, weatherTitleHTMLTemplate };
+module.exports = { weatherHtmlTemplate, weatherTitleHTMLTemplate };
