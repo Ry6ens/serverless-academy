@@ -16,9 +16,9 @@ Requirements
 
 Your program should have 3 different functions that return an integer. For example:
 
-uniqueValues();
-existInAllFiles();
-existInAtleastTen();
+uniqueValues(); //
+existInAllFiles(); //
+existInAtleastTen(); //
 
 ⚠️ NOTE: Make sure you measure the performance of your program.
 
