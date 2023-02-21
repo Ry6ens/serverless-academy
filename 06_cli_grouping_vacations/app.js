@@ -32,18 +32,16 @@ async function groupingVacations() {
   });
 
   fs.writeFile(
-    "./result.txt",
+    "./result.json",
     JSON.stringify(result),
     {
       encoding: "utf8",
-      flag: "w",
-      mode: 0o666,
     },
     (err) => {
       if (err) console.log(err);
       else {
         console.log("File written successfully\n");
-        const file = fs.readFileSync("./result.txt", "utf8");
+        const file = fs.readFileSync("./result.json", "utf8");
         console.log(JSON.parse(file));
       }
     }
