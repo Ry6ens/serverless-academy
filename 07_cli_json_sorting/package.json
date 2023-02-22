@@ -1,0 +1,24 @@
+{
+  "name": "07_cli_json_sorting",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node ./json-sorting.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Ry6ens/serverless-academy.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "bugs": {
+    "url": "https://github.com/Ry6ens/serverless-academy/issues"
+  },
+  "homepage": "https://github.com/Ry6ens/serverless-academy#readme",
+  "dependencies": {
+    "node-fetch": "^3.3.0"
+  }
+}
