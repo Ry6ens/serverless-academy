@@ -1,5 +1,5 @@
 Your first task is to write a small CLI application without any external dependencies that
-expects the user to enter a few words or numbers separated by a space. Next, the progra
+expects the user to enter a few words or numbers separated by a space. Next, the program
 should ask how to sort the user's input.
 
 The complete flow should look like this:

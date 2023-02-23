@@ -3,6 +3,8 @@ import { stdin as input, stdout as output } from 'node:process';
 
 const rl = readline.createInterface({ input, output });
 
+console.log('Press ENTER to Start');
+
 rl.on('line', async input => {
   const answerFirst = await rl.question(
     'Hello. Enter 10 words or digits deviding them in space: '
@@ -49,16 +51,13 @@ rl.on('line', async input => {
       console.log('\nResult: ', resultD.join(' '));
       break;
     case 'e':
-      const resultE = [];
-      for (let i = 0; i < arrayWords.length; i++) {
-        let word = arrayWords[i];
-
-        if (arrayWords.indexOf(word) === arrayWords.lastIndexOf(word)) {
-          resultE.push(word);
-        }
+      let wordSet = new Set(arrayWords);
+      let unique = [];
+      for (let word of wordSet) {
+        unique.push(word);
       }
 
-      console.log('\nResult: ', resultE.join(' '));
+      console.log('\nResult: ', unique.join(' '));
       break;
     case 'f':
       const resultF = [];
