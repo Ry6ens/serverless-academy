@@ -30,35 +30,42 @@ rl.on('line', async input => {
   const arrayAll = answerFirst.split(' ');
 
   switch (answerSecond) {
+    // Sort words alphabetically
     case 'a':
       const resultA = arrayWords.sort();
 
       console.log('\nResult: ', resultA.join(' '));
       break;
+
+    //Show numbers from lesser to greater
     case 'b':
       const resultB = arrayNumbers.sort();
 
       console.log('\nResult: ', resultB.join(' '));
       break;
+
+    //Show numbers from bigger to smaller
     case 'c':
       const resultC = arrayNumbers.sort((a, b) => b - a);
 
       console.log('\nResult: ', resultC.join(' '));
       break;
+
+    //Display words in ascending order by number of letters in the word
     case 'd':
       const resultD = arrayWords.sort((a, b) => a.length - b.length);
 
       console.log('\nResult: ', resultD.join(' '));
       break;
-    case 'e':
-      let wordSet = new Set(arrayWords);
-      let unique = [];
-      for (let word of wordSet) {
-        unique.push(word);
-      }
 
-      console.log('\nResult: ', unique.join(' '));
+    //Show only unique words
+    case 'e':
+      const resultE = [...new Set(arrayWords)];
+
+      console.log('\nResult: ', resultE.join(' '));
       break;
+
+    //Display only unique values from the set of words and numbers entered by the user
     case 'f':
       const resultF = [];
       for (let i = 0; i < arrayAll.length; i++) {
@@ -71,6 +78,8 @@ rl.on('line', async input => {
 
       console.log('\nResult: ', resultF.join(' '));
       break;
+
+    //Exit
     case 'exit':
       rl.close();
       break;
